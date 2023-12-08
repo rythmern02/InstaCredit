@@ -1,0 +1,39 @@
+name: bnpl_flutter
+description: A new Flutter project.
+publish_to: "none"
+version: 0.1.0
+
+environment:
+  sdk: ">=3.0.5 <4.0.0"
+
+dependencies:
+  curved_labeled_navigation_bar: ^2.0.2
+  file_picker: ^6.1.1
+  flutter:
+    sdk: flutter
+  flutter_riverpod: ^2.4.9
+  flutter_svg: ^2.0.9
+  fluttertoast: ^8.2.4
+  google_fonts: ^6.1.0
+  http: ^1.1.2
+  intl: ^0.18.1
+  percent_indicator: ^4.2.3
+  riverpod: ^2.4.9
+  riverpod_annotation: ^2.3.3
+  shared_preferences: ^2.2.2
+  web3auth_flutter: ^3.1.1
+  web3dart: ^2.7.2
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^2.0.0
+  riverpod_generator: ^2.3.9
+  build_runner: ^2.4.7
+  custom_lint: ^0.5.7
+  riverpod_lint: ^2.3.7
+
+flutter:
+  uses-material-design: true
+  assets:
+    - assets/images/
