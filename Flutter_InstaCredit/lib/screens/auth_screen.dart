@@ -87,4 +87,99 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
 
     await Web3AuthFlutter.initialize();
   }
+
+  @override
+  Widget build(BuildContext context) {
+    final authStateFunc = ref.watch(authStateProvider.notifier);
+    return Scaffold(
+      backgroundColor: Colors.transparent,
+      resizeToAvoidBottomInset: false,
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          SvgPicture.asset(
+            'assets/images/background.svg',
+            fit: BoxFit.cover,
+          ),
+          SafeArea(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 24),
+              child: Column(
+                mainAxisSize: MainAxisSize.max,
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  const Text(
+                    "Login",
+                    style: TextStyle(
+                      fontSize: 40,
+                      color: gold,
+                      fontWeight: FontWeight.w300,
+                    ),
+                  ),
+                  const Text(
+                    "Use Google authentication to login or create a new account",
+                    textAlign: TextAlign.center,
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 24,
+                    ),
+                  ),
+                  TextButton(
+                    style: TextButton.styleFrom(
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16),
+                        side: const BorderSide(
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
+                    onPressed: () async {
+                      final Web3AuthResponse response =
+                          await Web3AuthFlutter.login(
+                        LoginParams(
+                          loginProvider: web3auth_enums.Provider.google,
+                          curve: web3auth_enums.Curve.secp256k1,
+                        ),
+                      );
+
+                      final prefs = await SharedPreferences.getInstance();
+
+                      final credentials =
+                          EthPrivateKey.fromHex(response.privKey ?? '0');
+                      print(credentials.address.hexEip55);
+
+                      authStateFunc.updateAuthState(
+                        email: response.userInfo!.email,
+                        credentials: credentials,
+                        firstName: response.userInfo!.name?.split(" ").first,
+                        lastName: response.userInfo!.name?.split(" ").last,
+                      );
+
+                      prefs.setString(
+                        "bnpl_flutter_priv_key",
+                        response.privKey.toString(),
+                      );
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const KycScreen(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      "Login",
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          )
+        ],
+      ),
+    );
+  }
 }
