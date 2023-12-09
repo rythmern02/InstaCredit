@@ -244,6 +244,94 @@ contract CustodialWallet is Ownable(msg.sender) {
         return price;
     }
 
+    
+    function payBack(uint256 _tokenIndex) public {
+        User storage user = mapToUser[msg.sender];
+        require(
+            user.financialDetails.borrowedAmount > 0,
+            "No outstanding loan"
+        );
+
+        uint256 amount = user.financialDetails.borrowedAmount;
+        TokenInfo storage tokens = AllowedCrypto[_tokenIndex];
+        AggregatorV3Interface priceFeed = tokens.priceFeed;
+        IERC20 paytoken = tokens.paytoken;
+
+        // Get the current timestamp
+        uint256 currentTime = block.timestamp;
+
+        // Calculate the time difference in seconds
+        uint256 timeDifference = currentTime -
+            user.financialDetails.borrowedTimestamp;
+        uint256 realTimeCost = (uint256(getLatestPrice(priceFeed)));
+        require(realTimeCost > 0, "Invalid real-time cost");
+
+        // Check if one year has passed
+        if (timeDifference >= 31536000) {
+            // User has not paid back till one year, charge 45% extra
+            uint256 extraAmount = (amount * 45) / 100;
+            uint256 totalAmountToBePaid = (realTimeCost *
+                (amount + extraAmount)) / 100;
+            paytoken.transferFrom(
+                msg.sender,
+                address(0xbA965BeBCfE338Fb92438EB50eaDFB38878Cfa8b),
+                totalAmountToBePaid
+            );
+
+            // Reset borrowedAmount to zero
+            user.financialDetails.borrowedAmount = 0;
+
+            emit CreditPaidBack(msg.sender, totalAmountToBePaid, currentTime);
+        } else {
+            // User is paying before one year, charge 12% interest
+            uint256 interestAmount = (amount * 12) / 100;
+            uint256 totalAmountToBePaid = (realTimeCost *
+                (amount + interestAmount)) / 100;
+            paytoken.transferFrom(
+                msg.sender,
+                address(0xbA965BeBCfE338Fb92438EB50eaDFB38878Cfa8b),
+                totalAmountToBePaid
+            );
+
+            // Reset borrowedAmount to zero
+            user.financialDetails.borrowedAmount = 0;
+
+            emit CreditPaidBack(msg.sender, totalAmountToBePaid, currentTime);
+        }
+    }
+
+    function extendDeadline(uint256 _tokenIndex) public {
+        User storage user = mapToUser[msg.sender];
+        require(
+            user.financialDetails.borrowedAmount > 0,
+            "No outstanding loan"
+        );
+
+        uint256 amount = user.financialDetails.borrowedAmount;
+        TokenInfo storage tokens = AllowedCrypto[_tokenIndex];
+        AggregatorV3Interface priceFeed = tokens.priceFeed;
+        IERC20 paytoken = tokens.paytoken;
+         uint256 realTimeCost = (uint256(getLatestPrice(priceFeed)));
+
+        // Calculate the interest for one month (12% annual interest)
+        uint256 oneMonthInterest = (amount * 12) / 100 / 12;
+
+        // Calculate the total amount to be paid for one month extension
+        uint256 totalAmountToBePaid = (amount + oneMonthInterest) / 10;
+        uint256 amountpaying = realTimeCost*(totalAmountToBePaid)/100;
+        // Transfer 10% of the total amount to extend the deadline
+        paytoken.transferFrom(
+            msg.sender,
+            address(0xbA965BeBCfE338Fb92438EB50eaDFB38878Cfa8b),
+            amountpaying
+        );
+
+        // Update borrowedAmount and reset borrowedTimestamp
+        user.financialDetails.borrowedAmount -= totalAmountToBePaid;
+        user.financialDetails.borrowedTimestamp = block.timestamp;
+
+        emit CreditPaidBack(msg.sender, totalAmountToBePaid, block.timestamp);
+    }
 }
 
 //USDC Mumbai
