@@ -88,6 +88,162 @@ contract CustodialWallet is Ownable(msg.sender) {
 
     // Event emitted when user contact details are set
     event ContactDetailsSet(address indexed user, string email, uint256 mobile);
+
+    
+    // Event emitted when user document details are set
+    event DocumentDetailsSet(
+        address indexed user,
+        docType nameOfDoc,
+        string docIdentityNumber,
+        string ipfsHashOfDoc,
+        string ipfsHashofPan,
+        uint256 panNumber
+    );
+    // Event emitted when user financial details are set
+    event FinancialDetailsSet(
+        address indexed user,
+        uint256 creditLimit,
+        uint256 cibilScore,
+        uint256 time
+    );
+
+    // Event emitted when funds are given to a user
+    event FundsGiven(address indexed user, uint256 amount, uint256 time);
+
+    // Event emitted when a user makes a transaction
+    event TransactionMade(address indexed user, uint256 amount, uint256 time);
+
+    // Event emitted when a user pays back a loan
+    event CreditPaidBack(
+        address indexed user,
+        uint256 amountPaid,
+        uint256 time
+    );
+
+    function addCurrency(IERC20 _paytoken, AggregatorV3Interface _pricefeed)
+        public
+        onlyOwner
+    {
+        AllowedCrypto.push(
+            TokenInfo({paytoken: _paytoken, priceFeed: _pricefeed})
+        );
+        emit CurrencyAdded(_paytoken, _pricefeed);
+    }
+
+    function setUserPersonalDetails(
+        string memory firstName,
+        string memory lastName,
+        string memory fathersName,
+        uint256 dateOfBirth,
+        Gender gender
+    ) public {
+        User storage user = mapToUser[msg.sender];
+        user.personalDetails.firstName = firstName;
+        user.personalDetails.lastName = lastName;
+        user.personalDetails.fathersName = fathersName;
+        user.personalDetails.dateOfBirth = dateOfBirth;
+        user.personalDetails.gender = gender;
+        emit PersonalDetailsSet(
+            msg.sender,
+            firstName,
+            lastName,
+            fathersName,
+            dateOfBirth,
+            gender
+        );
+    }
+
+    function setUserContactDetails(string memory email, uint256 mobile) public {
+        User storage user = mapToUser[msg.sender];
+        user.contactDetails.email = email;
+        user.contactDetails.mobile = mobile;
+        emit ContactDetailsSet(msg.sender, email, mobile);
+    }
+
+    function setUserDocumentDetails(
+        docType nameOfDoc,
+        string memory docIdentityNumber,
+        string memory ipfsHashOfDoc,
+        string memory ipfsHashofPan,
+        uint256 panNumber
+    ) public {
+        User storage user = mapToUser[msg.sender];
+        user.documentDetails.nameOfDoc = nameOfDoc;
+        user.documentDetails.docIdentityNumber = docIdentityNumber;
+        user.documentDetails.ipfsHashOfDoc = ipfsHashOfDoc;
+        user.documentDetails.ipfsHashofPan = ipfsHashofPan;
+        user.documentDetails.panNumber = panNumber;
+        emit DocumentDetailsSet(
+            msg.sender,
+            nameOfDoc,
+            docIdentityNumber,
+            ipfsHashOfDoc,
+            ipfsHashofPan,
+            panNumber
+        );
+    }
+
+    function setUserFinancialDetails(uint256 creditLimit, uint256 cibilScore)
+        public
+    {
+        User storage user = mapToUser[msg.sender];
+        user.financialDetails.creditLimit = creditLimit;
+        user.financialDetails.cibilScore = cibilScore;
+        user.financialDetails.borrowedAmount = 0;
+        user.financialDetails.userBalance = 0;
+        user.financialDetails.borrowedTimestamp = 0; // Initialize borrowedTimestamp to zero
+        emit FinancialDetailsSet(
+            msg.sender,
+            creditLimit,
+            cibilScore,
+            block.timestamp
+        );
+    }
+
+    function giveFunds(uint256 _amount) public {
+        User storage user = mapToUser[msg.sender];
+        require(
+            user.financialDetails.cibilScore >= 750,
+            "Insufficient CIBIL score"
+        );
+        require(
+            user.financialDetails.creditLimit >= _amount,
+            "Insufficient Credit Limit"
+        );
+
+        user.financialDetails.borrowedAmount += _amount;
+        user.financialDetails.userBalance += _amount;
+        user.financialDetails.creditLimit -= _amount;
+        user.financialDetails.borrowedTimestamp = block.timestamp; // Set borrowedTimestamp when funds are given
+        emit FundsGiven(msg.sender, _amount, block.timestamp);
+    }
+
+    function maketxn(uint256 _amount) public {
+        User storage user = mapToUser[msg.sender];
+        require(
+            user.financialDetails.userBalance >= _amount,
+            "Balance is Insufficient"
+        );
+        user.financialDetails.userBalance -= _amount;
+        emit TransactionMade(msg.sender, _amount, block.timestamp);
+    }
+
+    function getLatestPrice(AggregatorV3Interface priceFeed)
+        public
+        view
+        returns (int256)
+    {
+        (
+            ,
+            /*uint80 roundID*/
+            int256 price, /*uint startedAt*/ /*uint timeStamp*/ /*uint80 answeredInRound*/
+            ,
+            ,
+
+        ) = priceFeed.latestRoundData();
+        return price;
+    }
+
 }
 
 //USDC Mumbai
