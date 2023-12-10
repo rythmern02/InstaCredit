@@ -1,5 +1,6 @@
 import 'package:bnpl_flutter/constants.dart';
 import 'package:bnpl_flutter/riverpod/auth_state.dart';
+import 'package:bnpl_flutter/screens/pay_back.dart';
 import 'package:bnpl_flutter/services/contract_service.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -133,7 +134,12 @@ class _DashboardComponentState extends ConsumerState<DashboardComponent> {
             bottom: deviceHeight(context) * 0.1,
           ),
           child: ElevatedButton(
-            onPressed: () {},
+            onPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const PayBack(),
+              ),
+            ),
             style: ElevatedButton.styleFrom(
               backgroundColor: const Color(0xFF272727),
               shadowColor: Colors.white,
