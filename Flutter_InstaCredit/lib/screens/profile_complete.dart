@@ -1,7 +1,10 @@
+import 'dart:math';
+
 import 'package:bnpl_flutter/constants.dart';
 import 'package:bnpl_flutter/screens/home_screen.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:confetti/confetti.dart';
 
 class ProfileCompleteScreen extends StatefulWidget {
   const ProfileCompleteScreen({super.key});
@@ -11,8 +14,19 @@ class ProfileCompleteScreen extends StatefulWidget {
 }
 
 class _ProfileCompleteScreenState extends State<ProfileCompleteScreen> {
+  late ConfettiController controllerTopCenter;
+
+  @override
+  void initState() {
+    super.initState();
+    controllerTopCenter = ConfettiController(
+      duration: const Duration(seconds: 1),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    controllerTopCenter.play();
     return Scaffold(
       backgroundColor: Colors.transparent,
       resizeToAvoidBottomInset: false,
@@ -108,7 +122,39 @@ class _ProfileCompleteScreenState extends State<ProfileCompleteScreen> {
                 ),
               ],
             ),
-          )
+          ),
+          Align(
+            alignment: Alignment.bottomCenter,
+            child: Padding(
+              padding: const EdgeInsets.only(left: 32.0),
+              child: Stack(
+                children: [
+                  ConfettiWidget(
+                    shouldLoop: false,
+                    confettiController: controllerTopCenter,
+                    blastDirection: (pi + 1.25),
+                    blastDirectionality: BlastDirectionality.directional,
+                    maxBlastForce: 100, // set a lower max blast force
+                    minBlastForce: 8, // set a lower min blast force
+                    emissionFrequency: 1,
+                    numberOfParticles: 4,
+                    gravity: 0.5,
+                  ),
+                  ConfettiWidget(
+                    shouldLoop: false,
+                    confettiController: controllerTopCenter,
+                    blastDirection: (pi + 1.75),
+                    blastDirectionality: BlastDirectionality.directional,
+                    maxBlastForce: 100, // set a lower max blast force
+                    minBlastForce: 8, // set a lower min blast force
+                    emissionFrequency: 1,
+                    numberOfParticles: 4,
+                    gravity: 0.5,
+                  ),
+                ],
+              ),
+            ),
+          ),
         ],
       ),
     );

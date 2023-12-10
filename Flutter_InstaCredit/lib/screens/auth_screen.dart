@@ -10,6 +10,7 @@ import 'package:bnpl_flutter/riverpod/auth_state.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_svg/svg.dart';
+import 'package:push_restapi_dart/push_restapi_dart.dart' as push;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:web3auth_flutter/enums.dart' as web3auth_enums;
 import 'package:web3auth_flutter/input.dart';
@@ -46,6 +47,11 @@ class _AuthScreenState extends ConsumerState<AuthScreen> {
       authFunc.updateAuthState(
         credentials: EthPrivateKey.fromHex(
             prefs.getString("bnpl_flutter_priv_key") ?? "0"),
+      );
+      // const pushWallet = push.Wallet();
+      await push.initPush(
+        // wallet: Wallet(),
+        env: push.ENV.staging,
       );
       if (prefs.getBool("kyc_done") ?? false) {
         Navigator.pushAndRemoveUntil(

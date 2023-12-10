@@ -2,6 +2,7 @@
 
 import 'package:bnpl_flutter/components/welcome_fragment.dart';
 import 'package:bnpl_flutter/constants.dart';
+import 'package:bnpl_flutter/screens/support_chat.dart';
 import 'package:bnpl_flutter/screens/transaction_history.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar.dart';
 import 'package:curved_labeled_navigation_bar/curved_navigation_bar_item.dart';
@@ -76,14 +77,24 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
           ),
-          const CurvedNavigationBarItem(
-            child: Icon(
-              Icons.person_rounded,
-              size: 30,
-              color: Color(0xFFE0E0E0),
+          CurvedNavigationBarItem(
+            child: GestureDetector(
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => const SupportChat(),
+                  ),
+                );
+              },
+              child: const Icon(
+                Icons.support_agent_rounded,
+                size: 30,
+                color: Color(0xFFE0E0E0),
+              ),
             ),
-            label: "Profile",
-            labelStyle: TextStyle(
+            label: "Support",
+            labelStyle: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w400,
               color: Color(0xFF717271),
